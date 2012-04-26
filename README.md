@@ -4,7 +4,7 @@ This plugin allows the user to compile [Less CSS](http://lesscss.org/) resources
 
 ## Usage
 
-* Add a `:plugins` dependency to `[lein-lesscss "1.0-SNAPSHOT"]` activate the task.
+* Add a `:plugins` dependency to `[lein-lesscss "1.0-SNAPSHOT"]` to activate the task.
 
 * Use the `lesscss` task to perform the compilation.
 
