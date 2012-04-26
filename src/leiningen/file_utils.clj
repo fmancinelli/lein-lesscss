@@ -27,6 +27,11 @@
         )
   )
 
+;; Replace the file extension with another one.
+(defn replace-extension [filename new-extension]
+   (clojure.string/replace filename  (re-pattern (str (org.apache.commons.io.FilenameUtils/getExtension filename) "$")) new-extension)
+  )
+
 ;; Check if the file is a Less CSS file by looking at its extension.
 (defn is-less-file? [x]  
   (let [file (to-file x)]       
