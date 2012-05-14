@@ -15,7 +15,9 @@
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>
 
 (ns leiningen.lesscss
-  (:use [leiningen.file-utils :only [list-less-files to-file replace-extension]]))
+  (:use [leiningen.file-utils :only [list-less-files to-file replace-extension]]
+        [clojure.string :only [join]])
+  (:require [leiningen.core.main :as main]))
 
 ;; Create an instance of the Less CSS compiler.
 (def lesscss-compiler (new org.lesscss.LessCompiler))
@@ -37,8 +39,11 @@
 ;; Compile the Less CSS file to the specified output file.
 (defn lesscss-compile [project prefix less-file output-path]
   (let [output-file (get-output-file prefix less-file output-path)]
-    (do
-      (.compile lesscss-compiler less-file output-file))))
+    (try
+      (.compile lesscss-compiler less-file output-file)
+      (catch org.lesscss.LessException e
+        (str "ERROR: compiling " less-file ": " (.getMessage e))))))
+
 
 ;; Leiningen task. 
 (defn lesscss "Compile Less CSS resources." [project & args]
@@ -47,6 +52,10 @@
         ]
     ;; Iterate over all the Less CSS files and compile them
     (doseq [less-path lesscss-paths]
-      (let [less-files (list-less-files less-path)]
-        (doseq [less-file less-files]
-          (lesscss-compile project less-path less-file lesscss-output-path))))))
+      (let [less-files (list-less-files less-path)
+            errors (doall
+                     (filter identity
+                             (for [less-file less-files]
+                             (lesscss-compile project less-path less-file lesscss-output-path))))]
+        (if (not-empty errors)
+          (main/abort (join "\n" errors)))))))
