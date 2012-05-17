@@ -48,7 +48,8 @@
 ;; Leiningen task. 
 (defn lesscss "Compile Less CSS resources." [project & args]
   (let [lesscss-paths (:lesscss-paths project (default-lesscss-paths project)) 
-        lesscss-output-path (:compile-path project)
+        lesscss-output-path (or (:lesscss-output-path project)
+                                (:compile-path project))
         ]
     ;; Iterate over all the Less CSS files and compile them
     (doseq [less-path lesscss-paths]
