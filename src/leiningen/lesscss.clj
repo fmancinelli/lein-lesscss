@@ -20,7 +20,7 @@
   (:require [leiningen.core.main :as main]))
 
 ;; Create an instance of the Less CSS compiler.
-(def lesscss-compiler (new org.lesscss.LessCompiler))
+(def lesscss-compiler (delay (new org.lesscss.LessCompiler)))
 
 ;; Return a list containing a single path where Less files are stored.
 (defn default-lesscss-paths [project]
@@ -40,7 +40,9 @@
 (defn lesscss-compile [project prefix less-file output-path]
   (let [output-file (get-output-file prefix less-file output-path)]
     (try
-      (.compile lesscss-compiler less-file output-file)
+      (when (or (not (.exists output-file))
+                (> (.lastModified less-file) (.lastModified output-file)))
+        (.compile @lesscss-compiler less-file output-file))
       (catch org.lesscss.LessException e
         (str "ERROR: compiling " less-file ": " (.getMessage e))))))
 
