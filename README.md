@@ -1,6 +1,7 @@
 # Introduction
 
-This plugin allows the user to compile [Less CSS](http://lesscss.org/) resources to be used in the application.
+This plugin allows the user to compile [Less CSS](http://lesscss.org/) resources
+to be used in the application.
 
 ## Usage
 
@@ -8,7 +9,16 @@ This plugin allows the user to compile [Less CSS](http://lesscss.org/) resources
 
 * Use the `lesscss` task to perform the compilation.
 
-You can specify in your `project.clj` the `:lesscss-paths` attribute as a list of directories where Less CSS files are stored. By default this parameter is set to `less`
+You can specify in your `project.clj` the `:lesscss-paths` attribute as a list
+of directories where Less CSS files are stored. By default this parameter is set
+to `less`.  You can also specify the output path using `:lesscss-output-path`.
+
+For example:
+
+    ...
+    :lesscss-paths ["less" "path/to/other/location"]
+    :lesscss-output-path "resource/public/css"
+    ...
 
 ## License
 
