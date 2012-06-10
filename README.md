@@ -20,6 +20,11 @@ For example:
     :lesscss-output-path "resource/public/css"
     ...
 
+## Contributors
+
+* Fabio Mancinelli <fabio@mancinelli.me>
+* John Szakmeister <john@szakmeister.net>
+
 ## License
 
 Copyright © 2012 Fabio Mancinelli <fabio@mancinelli.me>
