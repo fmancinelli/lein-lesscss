@@ -7,11 +7,9 @@ to be used in the application.
 
 * Add `[lein-lesscss "1.2"]` to the  `:plugins` section in your `project.clj` or `~/.lein/profiles.clj` (the latter is Leiningen 2-specific).
 
-* Use the `lesscss` task to perform the compilation.
+* Use `lein lesscss once` to perform the compilation once
 
-The `lesscss` task supports two commands: ```auto``` and ```once```
-The ```auto``` command will auto-compile the less directory when any changes
-to the less occur. The ```once``` command will compile the less directory once.
+* Use `lein lesscss auto` to perform the compilation whenever the less files are changed
 
 You can specify in your `project.clj` the `:lesscss-paths` attribute as a list
 of directories where Less CSS files are stored. By default this parameter is set
