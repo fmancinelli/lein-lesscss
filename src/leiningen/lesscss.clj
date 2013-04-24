@@ -19,9 +19,9 @@
 
 (ns leiningen.lesscss
   (:use [leiningen.file-utils :only [list-less-files to-file replace-extension]]
-        [clojure.string :only [join]]
-        [watchtower.core :only [watcher]])
-  (:require [leiningen.core.main :as main]))
+        [clojure.string :only [join]])
+  (:require [leiningen.core.main :as main]
+            [watchtower.core :refer :all]))
 
 ;; Create an instance of the Less CSS compiler.
 (def lesscss-compiler (delay (new org.lesscss.LessCompiler)))
@@ -50,9 +50,7 @@
       (catch org.lesscss.LessException e
         (str "ERROR: compiling " less-file ": " (.getMessage e))))))
 
-
-;; Leiningen task. 
-(defn lesscss "Compile Less CSS resources." [project & args]
+(defn once "Compile Less CSS resources once." [project]
   (let [lesscss-paths (:lesscss-paths project (default-lesscss-paths project)) 
         lesscss-output-path (or (:lesscss-output-path project)
                                 (:compile-path project))
@@ -66,3 +64,15 @@
                              (lesscss-compile project less-path less-file lesscss-output-path))))]
         (if (not-empty errors)
           (main/abort (join "\n" errors)))))))
+
+(defn auto "Compile Less CSS resources whenever there's a change." [project]
+  @(watcher (vec (:lesscss-paths project (default-lesscss-paths project)))
+    (rate 50) ;; poll every 50ms
+    (on-change (fn [file]
+                 (once project)))))
+
+;; Leiningen task. 
+(defn lesscss "Compile Less CSS resources." [project & args]
+  (cond (= (first args) "auto") (auto project)
+        (= (first args) "once") (once project)
+        :else (println "lesscss once - to compile files once\nlesscss auto - to auto-compile whenever a change occurs")))
