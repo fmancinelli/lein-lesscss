@@ -9,6 +9,10 @@ to be used in the application.
 
 * Use the `lesscss` task to perform the compilation.
 
+The `lesscss` task supports two commands: ```auto``` and ```once```
+The ```auto``` command will auto-compile the less directory when any changes
+to the less occur. The ```once``` command will compile the less directory once.
+
 You can specify in your `project.clj` the `:lesscss-paths` attribute as a list
 of directories where Less CSS files are stored. By default this parameter is set
 to `less`.  You can also specify the output path using `:lesscss-output-path`.
