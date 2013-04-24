@@ -19,7 +19,8 @@
 
 (ns leiningen.lesscss
   (:use [leiningen.file-utils :only [list-less-files to-file replace-extension]]
-        [clojure.string :only [join]])
+        [clojure.string :only [join]]
+        [watchtower.core :only [watcher]])
   (:require [leiningen.core.main :as main]))
 
 ;; Create an instance of the Less CSS compiler.
