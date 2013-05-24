@@ -50,3 +50,19 @@
        file-seq
        (filter is-less-file?)))
 
+(defn canonical-dir-path
+  "Returns canonical path of file if it is a directory otherwise that of its parent."
+  [file]
+  (let [file (io/file file)
+        file (if (.isFile file) (.getParentFile file) file)]
+    (.getCanonicalPath file)))
+
+(defn rebase-path
+  "Replace base with new-base in path."
+  [path base new-base]
+  (let [path (-> path io/file .getCanonicalPath)
+        base (canonical-dir-path base)
+        new-base (canonical-dir-path new-base)
+        relative (clojure.string/replace path base ".")]
+    (.getCanonicalPath (io/file new-base relative))))
+

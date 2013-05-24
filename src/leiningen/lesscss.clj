@@ -3,6 +3,7 @@
 ;;
 ;; Contributors:
 ;;   John Szakmeister <john@szakmeister.net>
+;;   Sergey Shishkin <sergei.shishkin@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -21,29 +22,30 @@
   (:use [leiningen.file-utils]
         [clojure.string :only [join]])
   (:require [leiningen.core.main :as main]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io])
+  (:import [org.apache.commons.io FilenameUtils]))
 
 ;; Create an instance of the Less CSS compiler.
 (def lesscss-compiler (delay (new org.lesscss.LessCompiler)))
 
 ;; Return a list containing a single path where Less files are stored.
 (defn default-lesscss-paths [project]
-  (cons (org.apache.commons.io.FilenameUtils/normalize  (str (:root project) "/less")) nil))
+  (cons (FilenameUtils/normalize (str (:root project) "/less")) nil))
 
-;; Get the file where to store the compiled output. Its path will depend on the relative path in the source tree.
-;; For example, if the path where less files are stored is '/.../projectdir/less/', the current less file is
-;; '/.../projectdir/less/foo/bar.less' and the output path is '/.../projectdir/target/classes' then
-;; the output path will be '/.../projectdir/target/classes/foo/bar.less'
-(defn get-output-file [base-path file output-path]
-  (let [base-file (io/file base-path)
-        base-path (if (.isFile base-file) (.getParent base-file) base-path)
-        relative-path (clojure.string/replace (.getAbsolutePath file) base-path "")]
-    (io/file
-     (replace-extension (org.apache.commons.io.FilenameUtils/normalize (str output-path "/" relative-path)) "css"))))
+(defn get-output-file
+  "Get the file where to store the compiled output. Its path will depend on the
+  relative path in the source tree. For example, if the path where less files
+  are stored is '/.../projectdir/less/', the current less file is
+  '/.../projectdir/less/foo/bar.less' and the output path is
+  '/.../projectdir/target/classes' then the output path will be
+  '/.../projectdir/target/classes/foo/bar.less'"
+  [base-path file output-path]
+  (let [output-file (rebase-path file base-path output-path)]
+    (replace-extension output-file "css")))
 
 ;; Compile the Less CSS file to the specified output file.
 (defn lesscss-compile [project prefix less-file output-path]
-  (let [output-file (get-output-file prefix less-file output-path)]
+  (let [output-file (io/file (get-output-file prefix less-file output-path))]
     (try
       (when (or (not (.exists output-file))
                 (> (.lastModified less-file) (.lastModified output-file)))
