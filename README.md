@@ -5,7 +5,9 @@ to be used in the application.
 
 ## Usage
 
-* Add `[lein-lesscss "1.3"]` to the  `:plugins` section in your `project.clj` or `~/.lein/profiles.clj` (the latter is Leiningen 2-specific).
+* This is my "private" fork of the project. See the original one at http://github.com/fmancinelli/lein-lesscss or use at your own risk.
+
+* Add `[org.clojars.shishkin/lein-lesscss "1.3-SNAPSHOT"]` to the  `:plugins` section in your `project.clj` or `~/.lein/profiles.clj` (the latter is Leiningen 2-specific).
 
 * Use the `lesscss` task to perform the compilation.
 
@@ -24,6 +26,7 @@ For example:
 
 * Fabio Mancinelli <fabio@mancinelli.me>
 * John Szakmeister <john@szakmeister.net>
+* Sergey Shishkin <sergei.shishkin@gmail.com>
 
 ## License
 
