@@ -18,9 +18,10 @@
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>
 
 (ns leiningen.lesscss
-  (:use [leiningen.file-utils :only [list-less-files to-file replace-extension]]
+  (:use [leiningen.file-utils]
         [clojure.string :only [join]])
-  (:require [leiningen.core.main :as main]))
+  (:require [leiningen.core.main :as main]
+            [clojure.java.io :as io]))
 
 ;; Create an instance of the Less CSS compiler.
 (def lesscss-compiler (delay (new org.lesscss.LessCompiler)))
@@ -34,10 +35,10 @@
 ;; '/.../projectdir/less/foo/bar.less' and the output path is '/.../projectdir/target/classes' then
 ;; the output path will be '/.../projectdir/target/classes/foo/bar.less'
 (defn get-output-file [base-path file output-path]
-  (let [base-file (to-file base-path)
+  (let [base-file (io/file base-path)
         base-path (if (.isFile base-file) (.getParent base-file) base-path)
         relative-path (clojure.string/replace (.getAbsolutePath file) base-path "")]
-    (to-file
+    (io/file
      (replace-extension (org.apache.commons.io.FilenameUtils/normalize (str output-path "/" relative-path)) "css"))))
 
 ;; Compile the Less CSS file to the specified output file.
