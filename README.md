@@ -5,7 +5,7 @@ to be used in the application.
 
 ## Usage
 
-* Add `[lein-lesscss "1.2"]` to the  `:plugins` section in your `project.clj` or `~/.lein/profiles.clj` (the latter is Leiningen 2-specific).
+* Add `[lein-lesscss "1.3"]` to the  `:plugins` section in your `project.clj` or `~/.lein/profiles.clj` (the latter is Leiningen 2-specific).
 
 * Use the `lesscss` task to perform the compilation.
 
