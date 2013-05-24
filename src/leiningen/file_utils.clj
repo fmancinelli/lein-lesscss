@@ -31,7 +31,8 @@
   [filename new-extension]
   (-> filename
       FilenameUtils/removeExtension
-      (str "." new-extension)))
+      (str "." new-extension)
+      io/file))
 
 (defn is-less-file?
   "Check if the file is a Less CSS file by looking at its extension."

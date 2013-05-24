@@ -39,33 +39,49 @@
   '/.../projectdir/less/foo/bar.less' and the output path is
   '/.../projectdir/target/classes' then the output path will be
   '/.../projectdir/target/classes/foo/bar.less'"
-  [base-path file output-path]
+  [file base-path output-path]
   (let [output-file (rebase-path file base-path output-path)]
     (replace-extension output-file "css")))
 
-;; Compile the Less CSS file to the specified output file.
-(defn lesscss-compile [project prefix less-file output-path]
-  (let [output-file (io/file (get-output-file prefix less-file output-path))]
-    (try
-      (when (or (not (.exists output-file))
-                (> (.lastModified less-file) (.lastModified output-file)))
-        (.compile @lesscss-compiler less-file output-file))
-      (catch org.lesscss.LessException e
-        (str "ERROR: compiling " less-file ": " (.getMessage e))))))
+(defn should-compile?
+  "True if target doesn't exist or is older than source."
+  [source target]
+  (let [source (io/file source)
+        target (io/file target)]
+    (or (-> target .exists not)
+        (> (.lastModified source) (.lastModified target)))))
 
+(defn lesscss-compile
+  "Compile the source file to the specified output file."
+  [{file :file
+    base-path :base-path
+    output-path :output-path}]
+  (let [file (io/file file)
+        target (get-output-file file base-path output-path)]
+    (when (should-compile? file target)
+      (try (.compile @lesscss-compiler file target)
+        (catch org.lesscss.LessException e
+          (str "ERROR: compiling " file ": " (.getMessage e)))))))
 
-;; Leiningen task. 
-(defn lesscss "Compile Less CSS resources." [project & args]
-  (let [lesscss-paths (:lesscss-paths project (default-lesscss-paths project)) 
-        lesscss-output-path (or (:lesscss-output-path project)
-                                (:compile-path project))
-        ]
-    ;; Iterate over all the Less CSS files and compile them
-    (doseq [less-path lesscss-paths]
-      (let [less-files (list-less-files less-path)
-            errors (doall
-                     (filter identity
-                             (for [less-file less-files]
-                             (lesscss-compile project less-path less-file lesscss-output-path))))]
-        (if (not-empty errors)
-          (main/abort (join "\n" errors)))))))
+(defn compiler-tasks
+  "Returns a sequence of maps, each representing single file compilation call."
+  [project]
+  (let [paths (:lesscss-paths project (default-lesscss-paths project)) 
+        output-path (or (:lesscss-output-path project)
+                        (:compile-path project))]
+    (for [path paths
+          file (list-less-files path)]
+      {:file file
+       :base-path path
+       :output-path output-path})))
+
+(defn lesscss
+  "Compile Less CSS resources."
+  [project & args]
+  (let [errors (->> project compiler-tasks
+                    (map lesscss-compile)
+                    (filter identity)
+                    (join "\n"))]
+    (when (not-empty errors)
+      (main/abort errors))))
+
