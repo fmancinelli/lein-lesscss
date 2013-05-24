@@ -3,6 +3,7 @@
 ;;
 ;; Contributors:
 ;;   John Szakmeister <john@szakmeister.net>
+;;   Sergey Shishkin <sergei.shishkin@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -28,24 +29,24 @@
 (defn replace-extension
   "Replace the file extension with another one."
   [filename new-extension]
-  (clojure.string/replace filename (re-pattern (str (FilenameUtils/getExtension filename) "$")) new-extension))
+  (-> filename
+      FilenameUtils/removeExtension
+      (str "." new-extension)))
 
 (defn is-less-file?
   "Check if the file is a Less CSS file by looking at its extension."
-  [x]
-  (let [file (io/file x)]       
+  [file]
+  (let [file (io/file file)]       
     (and
       (.isFile file)
-      (FilenameUtils/isExtension (.getName file) less-file-extensions))))
+      (-> file .getName
+          (FilenameUtils/isExtension less-file-extensions)))))
 
 (defn list-less-files
   "Recursively inspect the path to discover Less CSS files."
   [path]
-  (let [path (io/file path)
-        children (.listFiles path)
-        directories (filter #(.isDirectory %) children)
-        less-files (filter is-less-file? children)]
-    (if (is-less-file? path)
-      [path]
-      (concat less-files (mapcat list-less-files directories)))))
+  (->> path
+       io/file
+       file-seq
+       (filter is-less-file?)))
 
