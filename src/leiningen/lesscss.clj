@@ -34,10 +34,11 @@
 ;; '/.../projectdir/less/foo/bar.less' and the output path is '/.../projectdir/target/classes' then
 ;; the output path will be '/.../projectdir/target/classes/foo/bar.less'
 (defn get-output-file [base-path file output-path]
-  (let [relative-path (clojure.string/replace (.getAbsolutePath file) base-path "")]
+  (let [base-file (to-file base-path)
+        base-path (if (.isFile base-file) (.getParent base-file) base-path)
+        relative-path (clojure.string/replace (.getAbsolutePath file) base-path "")]
     (to-file
-     (replace-extension (org.apache.commons.io.FilenameUtils/normalize (str output-path "/" relative-path)) "css")
-     )))
+     (replace-extension (org.apache.commons.io.FilenameUtils/normalize (str output-path "/" relative-path)) "css"))))
 
 ;; Compile the Less CSS file to the specified output file.
 (defn lesscss-compile [project prefix less-file output-path]

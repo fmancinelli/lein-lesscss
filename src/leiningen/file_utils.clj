@@ -47,10 +47,10 @@
 
 ;; Recursively inspect the path to discover Less CSS files.
 (defn list-less-files [path]
-  (let [dir (to-file path)
-        all-files (.listFiles dir)
-        directories (filter #(.isDirectory %) all-files)
-        standard-files (filter is-less-file? all-files)
-        ]
-    (concat standard-files  (mapcat list-less-files directories))
-    ))
+  (let [path (to-file path)
+        children (.listFiles path)
+        directories (filter #(.isDirectory %) children)
+        less-files (filter is-less-file? children)]
+    (if (is-less-file? path)
+      [path]
+      (concat less-files  (mapcat list-less-files directories)))))
