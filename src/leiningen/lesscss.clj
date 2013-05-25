@@ -72,16 +72,17 @@
         :let [task (assoc settings :file file :base-path path)]]
     (assoc task :output-file (get-output-file task))))
 
+(defn report-errors
+  "Aborts leiningen task in case of errors."
+  [results]
+  (when-let [errors (seq (filter identity results))]
+    (main/abort (join "\n" errors))))
+
 (defn lesscss
   "Compile Less CSS resources."
   [project & args]
   (let [settings (less-settings project)
         compiler (compiler settings)
-        tasks (compiler-tasks settings)
-        errors (map compiler tasks)
-        errors (->> errors
-                    (filter identity)
-                    (join "\n"))]
-    (when (not-empty errors)
-      (main/abort errors))))
+        tasks (compiler-tasks settings)]
+    (report-errors (map compiler tasks))))
 
