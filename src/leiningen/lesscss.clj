@@ -29,7 +29,8 @@
   "Returns a map of LESS project settings."
   [project]
   {:paths (get project :lesscss-paths (.getCanonicalPath (io/file (:root project) "less")))
-   :output-path (get project :lesscss-output-path (:compile-path project))})
+   :output-path (get project :lesscss-output-path (:compile-path project))
+   :compress (get project :lesscss-compress false)})
 
 (defn get-output-file
   "Get the file where to store the compiled output. Its path will depend on the
@@ -62,8 +63,10 @@
 
 (defn compiler
   "Returns the compiler function."
-  [settings]
-  (let [compiler (new LessCompiler)]
+  [{compress :compress}]
+  (let [compiler (doto (LessCompiler.)
+                   (.setCompress compress)
+                   (.init))]
     (partial lesscss-compile compiler)))
 
 (defn compiler-tasks
