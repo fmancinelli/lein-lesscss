@@ -25,12 +25,15 @@
             [clojure.java.io :as io])
   (:import [org.lesscss LessCompiler]))
 
+(def default-settings
+  {:paths ["resources/less"]
+   :output-path "resources/public/css"
+   :compress false})
+
 (defn less-settings
   "Returns a map of LESS project settings."
   [project]
-  {:paths (get project :lesscss-paths (.getCanonicalPath (io/file (:root project) "less")))
-   :output-path (get project :lesscss-output-path (:compile-path project))
-   :compress (get project :lesscss-compress false)})
+  (merge default-settings (:lesscss project)))
 
 (defn get-output-file
   "Get the file where to store the compiled output. Its path will depend on the
@@ -69,16 +72,17 @@
         :let [task (assoc settings :file file :base-path path)]]
     (assoc task :output-file (get-output-file task))))
 
+(defn report-errors
+  "Aborts leiningen task in case of errors."
+  [results]
+  (when-let [errors (seq (filter identity results))]
+    (main/abort (join "\n" errors))))
+
 (defn lesscss
   "Compile Less CSS resources."
   [project & args]
   (let [settings (less-settings project)
         compiler (compiler settings)
-        tasks (compiler-tasks settings)
-        errors (map compiler tasks)
-        errors (->> errors
-                    (filter identity)
-                    (join "\n"))]
-    (when (not-empty errors)
-      (main/abort errors))))
+        tasks (compiler-tasks settings)]
+    (report-errors (map compiler tasks))))
 
