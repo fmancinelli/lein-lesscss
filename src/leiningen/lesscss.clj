@@ -29,7 +29,8 @@
   "Returns a map of LESS project settings."
   [project]
   {:paths (get project :lesscss-paths (.getCanonicalPath (io/file (:root project) "less")))
-   :output-path (get project :lesscss-output-path (:compile-path project))})
+   :output-path (get project :lesscss-output-path (:compile-path project))
+   :compress (get project :lesscss-compress false)})
 
 (defn get-output-file
   "Get the file where to store the compiled output. Its path will depend on the
@@ -44,26 +45,20 @@
   (let [output-file (rebase-path file base-path output-path)]
     (replace-extension output-file "css")))
 
-(defn should-compile?
-  "True if target doesn't exist or is older than source."
-  [source target]
-  (let [source (io/file source)
-        target (io/file target)]
-    (or (-> target .exists not)
-        (> (.lastModified source) (.lastModified target)))))
-
 (defn lesscss-compile
   "Compile the source file to the output file as specified in task."
   [compiler {file :file output-file :output-file}]
-    (when (should-compile? file output-file)
-      (try (.compile compiler (io/file file) (io/file output-file))
-        (catch org.lesscss.LessException e
-          (str "ERROR: compiling " file ": " (.getMessage e))))))
+  (let [force-recompile false]
+    (try (.compile compiler (io/file file) (io/file output-file) force-recompile)
+      (catch org.lesscss.LessException e
+        (str "ERROR: compiling " file ": " (.getMessage e))))))
 
 (defn compiler
   "Returns the compiler function."
-  [settings]
-  (let [compiler (new LessCompiler)]
+  [{compress :compress}]
+  (let [compiler (doto (LessCompiler.)
+                   (.setCompress compress)
+                   (.init))]
     (partial lesscss-compile compiler)))
 
 (defn compiler-tasks
