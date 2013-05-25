@@ -31,11 +31,6 @@
   {:paths (get project :lesscss-paths (.getCanonicalPath (io/file (:root project) "less")))
    :output-path (get project :lesscss-output-path (:compile-path project))})
 
-(defn lesscss-compiler
-  "Create an instance of the Less CSS compiler."
-  [settings]
-  (new LessCompiler))
-
 (defn get-output-file
   "Get the file where to store the compiled output. Its path will depend on the
   relative path in the source tree. For example, if the path where less files
@@ -43,7 +38,9 @@
   '/.../projectdir/less/foo/bar.less' and the output path is
   '/.../projectdir/target/classes' then the output path will be
   '/.../projectdir/target/classes/foo/bar.less'"
-  [file base-path output-path]
+  [{file :file
+    base-path :base-path
+    output-path :output-path}]
   (let [output-file (rebase-path file base-path output-path)]
     (replace-extension output-file "css")))
 
@@ -56,34 +53,34 @@
         (> (.lastModified source) (.lastModified target)))))
 
 (defn lesscss-compile
-  "Compile the source file to the specified output file."
-  [compiler
-   {file :file
-    base-path :base-path
-    output-path :output-path}]
-  (let [file (io/file file)
-        target (get-output-file file base-path output-path)]
-    (when (should-compile? file target)
-      (try (.compile compiler file target)
+  "Compile the source file to the output file as specified in task."
+  [compiler {file :file output-file :output-file}]
+    (when (should-compile? file output-file)
+      (try (.compile compiler (io/file file) (io/file output-file))
         (catch org.lesscss.LessException e
-          (str "ERROR: compiling " file ": " (.getMessage e)))))))
+          (str "ERROR: compiling " file ": " (.getMessage e))))))
+
+(defn compiler
+  "Returns the compiler function."
+  [settings]
+  (let [compiler (new LessCompiler)]
+    (partial lesscss-compile compiler)))
 
 (defn compiler-tasks
   "Returns a sequence of maps, each representing single file compilation call."
   [{paths :paths :as settings}]
   (for [path paths
-        file (list-less-files path)]
-    (assoc settings
-           :file file
-           :base-path path)))
+        file (list-less-files path)
+        :let [task (assoc settings :file file :base-path path)]]
+    (assoc task :output-file (get-output-file task))))
 
 (defn lesscss
   "Compile Less CSS resources."
   [project & args]
   (let [settings (less-settings project)
-        compiler (lesscss-compiler settings)
+        compiler (compiler settings)
         tasks (compiler-tasks settings)
-        errors (map #(lesscss-compile compiler %) tasks)
+        errors (map compiler tasks)
         errors (->> errors
                     (filter identity)
                     (join "\n"))]
