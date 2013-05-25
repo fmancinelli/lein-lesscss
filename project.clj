@@ -14,11 +14,13 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>
 
-(defproject org.clojars.shishkin/lein-lesscss "1.3-SNAPSHOT"
+(defproject org.clojars.shishkin/lein-lesscss "1.3.3-SNAPSHOT"
   :description "Leiningen plugin for compiling Less CSS files."
-  :url "http://github.com/fmancinelli/lein-lesscss"
+  :url "https://github.com/shishkin/lein-lesscss"
   :license {:name "LGPLv3"
             :url "http://www.gnu.org/licenses/lgpl-3.0.en.html"}
+  :scm {:name "git"
+        :url "https://github.com/shishkin/lein-lesscss"}
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.lesscss/lesscss "1.3.3"]]
   :eval-in-leiningen true)
