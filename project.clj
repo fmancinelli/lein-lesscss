@@ -21,6 +21,5 @@
             :url "http://www.gnu.org/licenses/lgpl-3.0.en.html"}
   :scm {:name "git"
         :url "https://github.com/shishkin/lein-lesscss"}
-  :dependencies [[org.clojure/clojure "1.4.0"]
-                 [org.lesscss/lesscss "1.3.3"]]
+  :dependencies [[org.lesscss/lesscss "1.3.3"]]
   :eval-in-leiningen true)
