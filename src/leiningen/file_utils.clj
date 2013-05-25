@@ -22,6 +22,11 @@
   (:require [clojure.java.io :as io])
   (:import [org.apache.commons.io FilenameUtils]))
 
+(defn path
+  "Returns canonical path of the clojure.java.io/file built with args."
+  [& args]
+  (.getCanonicalPath (apply io/file args)))
+
 (def less-file-extensions
   "The default extensions for identifying Less CSS files."
   #{"less"})
@@ -45,8 +50,8 @@
 
 (defn list-less-files
   "Recursively inspect the path to discover Less CSS files."
-  [path]
-  (->> path
+  [file]
+  (->> file
        io/file
        file-seq
        (filter is-less-file?)))
@@ -56,14 +61,14 @@
   [file]
   (let [file (io/file file)
         file (if (.isFile file) (.getParentFile file) file)]
-    (.getCanonicalPath file)))
+    (path file)))
 
 (defn rebase-path
   "Replace base with new-base in path."
-  [path base new-base]
-  (let [path (-> path io/file .getCanonicalPath)
-        base (canonical-dir-path base)
+  [file base new-base]
+  (let [base (canonical-dir-path base)
         new-base (canonical-dir-path new-base)
-        relative (clojure.string/replace path base ".")]
-    (.getCanonicalPath (io/file new-base relative))))
+        relative (-> file path
+                     (clojure.string/replace base "."))]
+    (path new-base relative)))
 

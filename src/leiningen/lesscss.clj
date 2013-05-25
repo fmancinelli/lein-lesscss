@@ -25,12 +25,15 @@
             [clojure.java.io :as io])
   (:import [org.lesscss LessCompiler]))
 
+(def default-settings
+  {:paths ["resources/less"]
+   :output-path "resources/public/css"
+   :compress false})
+
 (defn less-settings
   "Returns a map of LESS project settings."
   [project]
-  {:paths (get project :lesscss-paths (.getCanonicalPath (io/file (:root project) "less")))
-   :output-path (get project :lesscss-output-path (:compile-path project))
-   :compress (get project :lesscss-compress false)})
+  (merge default-settings (:lesscss project)))
 
 (defn get-output-file
   "Get the file where to store the compiled output. Its path will depend on the
