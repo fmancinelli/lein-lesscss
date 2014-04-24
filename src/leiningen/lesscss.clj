@@ -23,7 +23,7 @@
         [clojure.string :only [join]])
   (:require [leiningen.core.main :as main]
             [clojure.java.io :as io])
-  (:import [org.lesscss LessCompiler]))
+  (:import [com.asual.lesscss LessEngine]))
 
 (def default-settings
   {:paths ["resources/less"]
@@ -50,19 +50,16 @@
 
 (defn lesscss-compile
   "Compile the source file to the output file as specified in task."
-  [compiler {file :file output-file :output-file}]
+  [compiler {file :file output-file :output-file compress :compress}]
   (let [force-recompile false]
     (try (.compile compiler (io/file file) (io/file output-file) force-recompile)
-      (catch org.lesscss.LessException e
+      (catch com.asual.lesscss.LessException e
         (str "ERROR: compiling " file ": " (.getMessage e))))))
 
 (defn compiler
   "Returns the compiler function."
-  [{compress :compress}]
-  (let [compiler (doto (LessCompiler.)
-                   (.setCompress compress)
-                   (.init))]
-    (partial lesscss-compile compiler)))
+  []
+  (partial lesscss-compile (LessEngine.)))
 
 (defn compiler-tasks
   "Returns a sequence of maps, each representing single file compilation call."
@@ -82,7 +79,6 @@
   "Compile Less CSS resources."
   [project & args]
   (let [settings (less-settings project)
-        compiler (compiler settings)
-        tasks (compiler-tasks settings)]
+        compiler (compiler)
+        tasks    (compiler-tasks settings)]
     (report-errors (map compiler tasks))))
-

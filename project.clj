@@ -14,12 +14,12 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>
 
-(defproject org.clojars.shishkin/lein-lesscss "1.3.4-SNAPSHOT"
+(defproject com.michaelnygard/lein-lesscss "1.5.1-SNAPSHOT"
   :description "Leiningen plugin for compiling Less CSS files."
-  :url "https://github.com/shishkin/lein-lesscss"
+  :url "https://github.com/mtnygard/lein-lesscss"
   :license {:name "LGPLv3"
             :url "http://www.gnu.org/licenses/lgpl-3.0.en.html"}
   :scm {:name "git"
-        :url "https://github.com/shishkin/lein-lesscss"}
-  :dependencies [[org.lesscss/lesscss "1.3.3"]]
+        :url "https://github.com/mtnygard/lein-lesscss"}
+  :dependencies [[com.asual.lesscss/lesscss-engine "1.5.0"]]
   :eval-in-leiningen true)
