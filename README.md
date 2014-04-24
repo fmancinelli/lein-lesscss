@@ -31,7 +31,7 @@ For example:
     ...
     :lesscss {:paths       ["less" "path/to/other/location/style.less"]
               :output-path "resource/public/css"
-              :compress true}
+              :compress    true}
     ...
 
 ## Contributors
