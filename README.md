@@ -1,5 +1,7 @@
 # Introduction
 
+[![Build Status](https://travis-ci.org/mtnygard/lein-lesscss.png)](https://travis-ci.org/mtnygard/lein-lesscss)
+
 This plugin allows the user to compile [Less CSS](http://lesscss.org/) resources
 to be used in the application.
 
