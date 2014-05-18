@@ -3,6 +3,7 @@
 ;;
 ;; Contributors:
 ;;   John Szakmeister <john@szakmeister.net>
+;;   Sergey Shishkin <sergei.shishkin@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,40 +18,57 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>
 
-(ns leiningen.file-utils)
+(ns leiningen.file-utils
+  (:require [clojure.java.io :as io])
+  (:import [org.apache.commons.io FilenameUtils]))
 
-;; The default extensions for identifying Less CSS files.
-(def less-file-extensions #{"less"})
+(defn path
+  "Returns canonical path of the clojure.java.io/file built with args."
+  [& args]
+  (.getCanonicalPath (apply io/file args)))
 
-;; Convert the argument to a java.io.File
-(defn to-file [o]
-  (cond (instance? java.io.File o) o
-        (instance? java.lang.String o) (new java.io.File o)
-        :else (new java.io.File (str o))
-        )
-  )
+(def less-file-extensions
+  "The default extensions for identifying Less CSS files."
+  #{"less"})
 
-;; Replace the file extension with another one.
-(defn replace-extension [filename new-extension]
-   (clojure.string/replace filename  (re-pattern (str (org.apache.commons.io.FilenameUtils/getExtension filename) "$")) new-extension)
-  )
+(defn replace-extension
+  "Replace the file extension with another one."
+  [filename new-extension]
+  (-> filename
+      FilenameUtils/removeExtension
+      (str "." new-extension)
+      io/file))
 
-;; Check if the file is a Less CSS file by looking at its extension.
-(defn is-less-file? [x]  
-  (let [file (to-file x)]       
+(defn is-less-file?
+  "Check if the file is a Less CSS file by looking at its extension."
+  [file]
+  (let [file (io/file file)]       
     (and
-     (.isFile file)
-     (org.apache.commons.io.FilenameUtils/isExtension (.getName file) less-file-extensions)
-     )
-    )
-  )
+      (.isFile file)
+      (-> file .getName
+          (FilenameUtils/isExtension less-file-extensions)))))
 
-;; Recursively inspect the path to discover Less CSS files.
-(defn list-less-files [path]
-  (let [dir (to-file path)
-        all-files (.listFiles dir)
-        directories (filter #(.isDirectory %) all-files)
-        standard-files (filter is-less-file? all-files)
-        ]
-    (concat standard-files  (mapcat list-less-files directories))
-    ))
+(defn list-less-files
+  "Recursively inspect the path to discover Less CSS files."
+  [file]
+  (->> file
+       io/file
+       file-seq
+       (filter is-less-file?)))
+
+(defn canonical-dir-path
+  "Returns canonical path of file if it is a directory otherwise that of its parent."
+  [file]
+  (let [file (io/file file)
+        file (if (.isFile file) (.getParentFile file) file)]
+    (path file)))
+
+(defn rebase-path
+  "Replace base with new-base in path."
+  [file base new-base]
+  (let [base (canonical-dir-path base)
+        new-base (canonical-dir-path new-base)
+        relative (-> file path
+                     (clojure.string/replace base "."))]
+    (path new-base relative)))
+
